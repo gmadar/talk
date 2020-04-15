@@ -1,3 +1,4 @@
+import { Redis } from "ioredis";
 import { uniq } from "lodash";
 import { Db } from "mongodb";
 
@@ -34,6 +35,7 @@ import {
   removeStory,
   retrieveManyStories,
   retrieveStory,
+  retrieveTopCommentedStoriesToday,
   setStoryMode,
   Story,
   updateStory,
@@ -411,4 +413,41 @@ export async function updateStoryMode(
   mode: GQLSTORY_MODE
 ) {
   return setStoryMode(mongo, tenant.id, storyID, mode);
+}
+
+export async function retrieveDailyTopCommentedStories(
+  mongo: Db,
+  redis: Redis,
+  tenantID: string,
+  now: Date
+) {
+  const results = await retrieveTopCommentedStoriesToday(
+    redis,
+    tenantID,
+    20,
+    now
+  );
+  const stories = await retrieveManyStories(
+    mongo,
+    tenantID,
+    results.map(value => value.storyID)
+  );
+  return results.map(result => {
+    const story = stories.find(s => s && s.id === result.storyID);
+    if (story) {
+      const { id, url, metadata } = story;
+      return {
+        story: {
+          id,
+          url,
+          metadata,
+        },
+        count: result.count,
+      };
+    }
+    return {
+      count: result.count,
+      story: null,
+    };
+  });
 }
