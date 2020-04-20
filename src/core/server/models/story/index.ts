@@ -667,7 +667,7 @@ export async function setStoryMode(
 export async function updateTopCommentedStoriesToday(
   redis: Redis,
   tenantID: string,
-  storyID: string,
+  story: Story,
   now: Date
 ) {
   // Get the current date to a today timestamp in seconds.
@@ -681,12 +681,12 @@ export async function updateTopCommentedStoriesToday(
     .toSeconds();
 
   // Craft the key.
-  const key = `tcst:${tenantID}:${today}`;
+  const key = `tcst:${tenantID}:${story.siteID}:${today}`;
 
   // Operate on Redis to increment this.
   await redis
     .multi()
-    .zincrby(key, 1, storyID)
+    .zincrby(key, 1, story.id)
     .expireat(key, expires)
     .exec();
 }
@@ -694,6 +694,7 @@ export async function updateTopCommentedStoriesToday(
 export async function retrieveTopCommentedStoriesToday(
   redis: Redis,
   tenantID: string,
+  siteID: string,
   limit: number,
   now: Date
 ) {
@@ -704,7 +705,7 @@ export async function retrieveTopCommentedStoriesToday(
 
   // Fetch the story ids with comment counts.
   const result: string[] = await redis.zrevrange(
-    `tcst:${tenantID}:${today}`,
+    `tcst:${tenantID}:${siteID}:${today}`,
     // Start pulling from the beginning of the list.
     0,
     // This refers to the "stop" of this zero indexed list, so we remove one.
