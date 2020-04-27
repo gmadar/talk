@@ -420,6 +420,7 @@ export async function retrieveDailyTopCommentedStories(
   redis: Redis,
   tenantID: string,
   siteID: string,
+  zone: string,
   now: Date
 ) {
   const results = await retrieveTopCommentedStoriesToday(
@@ -427,15 +428,16 @@ export async function retrieveDailyTopCommentedStories(
     tenantID,
     siteID,
     20,
+    zone,
     now
   );
   const stories = await retrieveManyStories(
     mongo,
     tenantID,
-    results.map(value => value.storyID)
+    results.map((value) => value.storyID)
   );
-  return results.map(result => {
-    const story = stories.find(s => s && s.id === result.storyID);
+  return results.map((result) => {
+    const story = stories.find((s) => s && s.id === result.storyID);
     if (story) {
       const { id, url, metadata } = story;
       return {
