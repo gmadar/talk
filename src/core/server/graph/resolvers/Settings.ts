@@ -29,5 +29,5 @@ export const Settings: GQLSettingsTypeResolver<Tenant> = {
     return sites.edges.length > 1;
   },
   webhookEvents: () => Object.values(GQLWEBHOOK_EVENT_NAME),
-  embedLinks: ({ embedLinks = {} }) => embedLinks,
+  embeds: ({ embeds = {} }) => embeds,
 };

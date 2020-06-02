@@ -263,9 +263,9 @@ export async function createTenant(
     slack: {
       channels: [],
     },
-    embedLinks: {
-      twitterEnabled: false,
-      youtubeEnabled: false,
+    embeds: {
+      twitter: false,
+      youtube: false,
     },
   };
 
